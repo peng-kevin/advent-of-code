@@ -39,10 +39,13 @@ with open(inputf) as f:
       grid.append([int(x) for x in r.split()])
     boards.append(Board(grid))
 
+last_winner = -1
 for d in draws:
   for b in boards:
     b.mark(d)
     if(b.isWin()):
-      print("winner:")
-      print(b.score() * d)
+      last_winner = b.score() * d
       b.disable()
+
+print("last winner:")
+print(last_winner)

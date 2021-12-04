@@ -35,7 +35,6 @@ with open(inputf) as f:
     boards.append(Board(grid))
 
 for d in draws:
-  print(d)
   for b in boards:
     b.mark(d)
     if(b.isWin()):
