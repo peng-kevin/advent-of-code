@@ -3,15 +3,15 @@ import re
 inputf = "input.txt"
 with open(inputf) as f:
   lines = [re.findall("(\d+),(\d+) -> (\d+),(\d+)", x)[0] for x in f.readlines()]
-lines = [(int(a), int(b), int(c), int(d)) for a, b, c, d in lines if (a == c or b == d)]
+lines = [(int(x1), int(y1), int(x2), int(y2)) for x1, y1, x2, y2 in lines if (x1 == x2 or y1 == y2)]
 
 overlaps = {}
-for a, b, c, d in lines:
-  if a == c:
-    for i in range(min(b, d), max(b, d) + 1):
-      overlaps[(a, i)] = overlaps.setdefault((a, i), 0) + 1
-  elif b == d:
-    for i in range(min(a, c), max(a, c) + 1):
-      overlaps[(i, b)] = overlaps.setdefault((i, b), 0) + 1
+for x1, y1, x2, y2 in lines:
+  if x1 == x2:
+    for i in range(min(y1, y2), max(y1, y2) + 1):
+      overlaps[(x1, i)] = overlaps.setdefault((x1, i), 0) + 1
+  elif y1 == y2:
+    for i in range(min(x1, x2), max(x1, x2) + 1):
+      overlaps[(i, y1)] = overlaps.setdefault((i, y1), 0) + 1
 overlaps = {k:v for k, v in overlaps.items() if v > 1}
 print(len(overlaps))
