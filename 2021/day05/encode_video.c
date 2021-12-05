@@ -15,7 +15,7 @@
 #define ENCODER_PRESET_FAST "veryfast"
 
 
-int open_pipe(int fps, char* filename, int* outfd, pid_t* pid) {
+int open_pipe(int fps, char* filename, enum Encoder encoder, int* outfd, pid_t* pid) {
     // create the pipe
     int pipefd[2];
     if (pipe(pipefd) == -1) {
@@ -32,7 +32,14 @@ int open_pipe(int fps, char* filename, int* outfd, pid_t* pid) {
         close(pipefd[1]);
         dup2(pipefd[0], STDIN_FILENO);
         close(pipefd[0]);
-        execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "80", "-loop", "0", filename, (char *) NULL);
+        switch(encoder) {
+            case MP4:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "libx264", "-preset", "veryslow", "-crf", "0", filename, (char *) NULL);
+                break;
+            case WEBP:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "100", "-loop", "0", filename, (char *) NULL);
+                break;
+        }
         return -1;
     }
     close(pipefd[0]);

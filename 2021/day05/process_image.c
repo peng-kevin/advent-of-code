@@ -7,8 +7,8 @@
 #include "util.h"
 
 #define ARRAY_RESIZE_INCREMENT 100;
-#define BLUR_SIGMA 3
-#define BLUR_RADIUS (BLUR_SIGMA*4)
+#define BLUR_SIGMA 4
+#define BLUR_RADIUS (BLUR_SIGMA*5)
 
 // value from 0 to 1, with 0 being invisible and 1 being maximally visible
 
@@ -139,7 +139,9 @@ double *add_glow(double *map, int width, int height) {
             // convolves 
             int index = row * width + col;
             if (map[index] != 0) {
-                vpass[index] = 0.1 * vpass[index] + 0.9 * map[index];
+                vpass[index] = 0.12 * vpass[index] + 0.9 * map[index];
+            } else {
+                vpass[index] *= 1.2;
             }
         }
     }

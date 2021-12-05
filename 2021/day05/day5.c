@@ -74,8 +74,8 @@ void write_image (struct Color *image, int width, int height, int fd) {
     //write the image
     written = write(fd, image, width * height * sizeof(*image));
     if (written != width * height * (long int) sizeof(*image)) {
-                fprintf(stderr, "Error writing to pipe\n");
-            exit(1);
+        fprintf(stderr, "Error writing to pipe\n");
+        exit(1);
     }
 }
 
@@ -108,7 +108,18 @@ int main(int argc, char *argv[]) {
     //initiate FFmpeg
     int outfd;
     pid_t pid;
-    if (open_pipe(60, argv[2], &outfd, &pid) == -1) {
+    // check whether we have a mp4 or webp
+    enum Encoder encoder;
+    int len = strlen(argv[2]);
+    if (len >= 4 && !strcmp(&(argv[2][len - 4]), ".mp4")) {
+        encoder = MP4;
+    } else if (len >= 5 && !strcmp(&(argv[2][len - 4]), ".mp4")) {
+        encoder = WEBP;
+    } else {
+        fprintf(stderr, "Error: only mp4 and webp4 output are supported. To select a format, choose a filename ending with .mp4 or .webp\n");
+        exit(1);
+    }
+    if (open_pipe(60, argv[2], encoder, &outfd, &pid) == -1) {
         perror("Error");
         exit(1);
     }

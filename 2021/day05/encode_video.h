@@ -13,6 +13,9 @@
  * format such as ppm.
  */
 
+// switch between mp4 and webp
+enum Encoder {MP4, WEBP};
+
 /**
  * Launches FFmpeg by forking the current process and creates a pipe with it.
  * @param[in] fps Frames per seconds of the video
@@ -22,7 +25,7 @@
  * @param[out] pid pid of child process
  * @return -1 if an error occured, 0 otherwise
  */
-int open_pipe(int fps, char* filename, int* outfd, pid_t* pid);
+int open_pipe(int fps, char* filename, enum Encoder encoder, int* outfd, pid_t* pid);
 
 /**
  * Cleans up by closing the write end of the pipe and waits for the child to exit.
