@@ -149,15 +149,13 @@ double *add_glow(double *map, int width, int height) {
 }
 
 struct Color* color_image(double *map, int width, int height, struct ColorMap colormap, double maxval) {
-    double *glow_image = add_glow(map, width, height);
     struct Color *new_image = malloc_or_die(width * height *sizeof(*new_image));
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             int index = row * width + col;
-            double val = fmax(fmin(glow_image[index], maxval), 0);
+            double val = fmax(fmin(map[index], maxval), 0);
             new_image[index] = color_pixel(val, colormap, maxval);
         }
     }
-    free(glow_image);
     return new_image;
 }

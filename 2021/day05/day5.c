@@ -80,7 +80,9 @@ void write_image (struct Color *image, int width, int height, int fd) {
 }
 
 void prepare_and_write_image (double *map, int width, int height, struct ColorMap colormap, int nframes, int fd) {
-    struct Color *prepared_image = color_image(map, width, height, colormap, MAXVAL);
+    double *glow_image = add_glow(map, width, height);
+    struct Color *prepared_image = color_image(glow_image, width, height, colormap, MAXVAL);
+    free(glow_image);
     for (int i = 0; i < nframes; i++) {
         write_image(prepared_image, width, height, fd);
     }
@@ -110,10 +112,10 @@ int main(int argc, char *argv[]) {
     pid_t pid;
     // check whether we have a mp4 or webp
     enum Encoder encoder;
-    int len = strlen(argv[2]);
-    if (len >= 4 && !strcmp(&(argv[2][len - 4]), ".mp4")) {
+    int flen = strlen(argv[2]);
+    if (flen >= 4 && !strcmp(&(argv[2][flen - 4]), ".mp4")) {
         encoder = MP4;
-    } else if (len >= 5 && !strcmp(&(argv[2][len - 4]), ".mp4")) {
+    } else if (flen >= 5 && !strcmp(&(argv[2][flen - 5]), ".webp")) {
         encoder = WEBP;
     } else {
         fprintf(stderr, "Error: only mp4 and webp4 output are supported. To select a format, choose a filename ending with .mp4 or .webp\n");

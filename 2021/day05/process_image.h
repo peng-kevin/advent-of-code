@@ -37,6 +37,16 @@ struct ColorMap load_colormap(const char *filename);
 void destroy_colormap(struct ColorMap colormap);
 
 /**
+ * Returns an image with a glow effect added. Best for objects on a black background
+ * 
+ * @param map array of brightness values
+ * @param width width of map
+ * @param height height of map
+ * @return double* array of same size as map with glowing effect
+ */
+double *add_glow(double *map, int width, int height);
+
+/**
  * Returns an image where every pixel is colored according to the corresponding value and given color_map
  *
  * Image must be in row-major order. The minval is assumed to be 0. Pixels
