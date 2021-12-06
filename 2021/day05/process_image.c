@@ -2,13 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <omp.h>
 
 #include "process_image.h"
 #include "util.h"
 
 #define ARRAY_RESIZE_INCREMENT 100;
-#define BLUR_SIGMA 4
-#define BLUR_RADIUS (BLUR_SIGMA*5)
 
 // value from 0 to 1, with 0 being invisible and 1 being maximally visible
 
@@ -99,49 +98,53 @@ struct Color color_pixel(double val, struct ColorMap colormap, double maxval) {
     return colormap.colors[index];
 }
 
-double *add_glow(double *map, int width, int height) {
+double *add_glow(double *map, int width, int height, int sigma, double glow_factor) {
+    int blur_radius = sigma * 5;
     // builds gaussian blur kernel
-    double gk[2 * BLUR_RADIUS + 1];
-    for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; i++) {
-        gk[i + BLUR_RADIUS] = (1/sqrt(2.0 * M_PI * BLUR_SIGMA * BLUR_SIGMA)) * exp(- ((i * i)/(2.0 * BLUR_SIGMA * BLUR_SIGMA)));
+    double gk[2 * blur_radius + 1];
+    for (int i = -blur_radius; i <= blur_radius; i++) {
+        gk[i + blur_radius] = (1/sqrt(2.0 * M_PI * sigma * sigma)) * exp(- ((i * i)/(2.0 * sigma * sigma)));
     }
     double *hpass = malloc_or_die(width * height *sizeof(*hpass));
     memset(hpass, 0, width * height *sizeof(*hpass));
     // performs gaussian blur
     // horizontal pass
+    #pragma omp parallel for
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             // convolves 
-            for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; i++) {
+            for (int i = -blur_radius; i <= blur_radius; i++) {
                 int kx = max(min(col + i, width -1), 0);
                 int ky = row;
-                hpass[row * width + col] += (map[ky * width + kx] * gk[i + BLUR_RADIUS]);
+                hpass[row * width + col] += (map[ky * width + kx] * gk[i + blur_radius]);
             }
         }
     }
     double *vpass = malloc_or_die(width * height *sizeof(*vpass));
     memset(vpass, 0, width * height *sizeof(*vpass));
     // vertical pass
+    #pragma omp parallel for
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             // convolves 
-            for (int i = -BLUR_RADIUS; i <= BLUR_RADIUS; i++) {
+            for (int i = -blur_radius; i <= blur_radius; i++) {
                 int kx = col;
                 int ky = max(min(row + i, height -1), 0);
-                vpass[row * width + col] += (hpass[ky * width + kx] * gk[i + BLUR_RADIUS]);
+                vpass[row * width + col] += (hpass[ky * width + kx] * gk[i + blur_radius]);
             }
         }
     }
     free(hpass);
     // blend the original blurred image
+    #pragma omp parallel for
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             // convolves 
             int index = row * width + col;
             if (map[index] != 0) {
-                vpass[index] = 0.12 * vpass[index] + 0.9 * map[index];
+                vpass[index] = 0.1 * glow_factor * vpass[index] + 0.9 * map[index];
             } else {
-                vpass[index] *= 1.2;
+                vpass[index] *= glow_factor;
             }
         }
     }
@@ -150,10 +153,11 @@ double *add_glow(double *map, int width, int height) {
 
 struct Color* color_image(double *map, int width, int height, struct ColorMap colormap, double maxval) {
     struct Color *new_image = malloc_or_die(width * height *sizeof(*new_image));
+    #pragma omp parallel for
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             int index = row * width + col;
-            double val = fmax(fmin(map[index], maxval), 0);
+            double val = fmax(fmin(map[index], maxval), 0.0);
             new_image[index] = color_pixel(val, colormap, maxval);
         }
     }

@@ -44,7 +44,7 @@ void destroy_colormap(struct ColorMap colormap);
  * @param height height of map
  * @return double* array of same size as map with glowing effect
  */
-double *add_glow(double *map, int width, int height);
+double *add_glow(double *map, int width, int height, int sigma, double glow_factor);
 
 /**
  * Returns an image where every pixel is colored according to the corresponding value and given color_map

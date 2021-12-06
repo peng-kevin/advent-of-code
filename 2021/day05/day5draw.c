@@ -80,7 +80,7 @@ void write_image (struct Color *image, int width, int height, int fd) {
 }
 
 void prepare_and_write_image (double *map, int width, int height, struct ColorMap colormap, int nframes, int fd) {
-    double *glow_image = add_glow(map, width, height);
+    double *glow_image = add_glow(map, width, height, 4, 1.2);
     struct Color *prepared_image = color_image(glow_image, width, height, colormap, MAXVAL);
     free(glow_image);
     for (int i = 0; i < nframes; i++) {
@@ -204,8 +204,8 @@ int main(int argc, char *argv[]) {
                 int index = row * width + col;
                 if (map[index] > 0 && map[index] <= 1) {
                     map[index] = i/(double)FADE_FRAMES;
-                } else if (map[index] >= 2) {
-                    map[index] += (2.0)/(double)FADE_FRAMES;
+                } else if (map[index] >= 1.5) {
+                    map[index] = map[index] + ((2.0)/(double)FADE_FRAMES);
                 }
             }
         }

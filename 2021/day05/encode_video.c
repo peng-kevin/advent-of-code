@@ -37,7 +37,10 @@ int open_pipe(int fps, char* filename, enum Encoder encoder, int* outfd, pid_t* 
                 execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "libx264", "-preset", "veryslow", "-crf", "0", "-pix_fmt", "yuv444p", filename, (char *) NULL);
                 break;
             case WEBP:
-                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "0", "-compression_level", "6", "-q:v", "80", "-loop", "0", filename, (char *) NULL);
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "100", "-loop", "0", filename, (char *) NULL);
+                break;
+            case WEBP_SHRINK:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vf", "scale=300:-1", "-sws_flags", "sinc", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "100", "-loop", "0", filename, (char *) NULL);
                 break;
         }
         return -1;
