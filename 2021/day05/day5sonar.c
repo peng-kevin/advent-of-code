@@ -96,14 +96,22 @@ void prepare_and_write_image (double *glow_map, double *line_map, int width, int
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "usage: %s infile outfile\n", argv[0]);
+    if (argc < 3 || argc > 4) {
+        fprintf(stderr, "usage: %s infile outfile [scale]\n", argv[0]);
         exit(1);
     }
     FILE *input = fopen(argv[1], "r");
     if (input == NULL) {
         perror("input");
         exit(1);
+    }
+
+    // will_scale is a boolean
+    int will_scale = 0;
+    // check if we have scale
+    if (argc == 4 && !strcmp(argv[3], "scale")) {
+        will_scale = 1;
+        printf("will scale output\n");
     }
 
     // load color map
@@ -120,9 +128,24 @@ int main(int argc, char *argv[]) {
     enum Encoder encoder;
     int flen = strlen(argv[2]);
     if (flen >= 4 && !strcmp(&(argv[2][flen - 4]), ".mp4")) {
-        encoder = MP4;
+        if (will_scale) {
+            printf("No option to scale mp4\n");
+            exit(1);
+        } else {
+            encoder = MP4;
+        }
     } else if (flen >= 5 && !strcmp(&(argv[2][flen - 5]), ".webp")) {
-        encoder = WEBP;
+        if (will_scale) {
+            encoder = WEBP_SCALE;
+        } else {
+            encoder = WEBP;
+        }
+    } else if (flen >= 4 && !strcmp(&(argv[2][flen-4]), ".gif")) {
+        if (will_scale) {
+            encoder = GIF_SCALE;
+        } else {
+            encoder = GIF;
+        }
     } else {
         fprintf(stderr, "Error: only mp4 and webp4 output are supported. To select a format, choose a filename ending with .mp4 or .webp\n");
         exit(1);
@@ -161,14 +184,11 @@ int main(int argc, char *argv[]) {
     double *map = calloc(height * width, sizeof(*map));
     // keep track of which frame we're on
     // iterate
-    printf("\n\n\n\n\n");
     for (int i = 0; i < len; i++) {
         int x1 = lines[4 * i];
         int y1 = lines[4 * i + 1];
         int x2 = lines[4 * i + 2];
         int y2 = lines[4 * i + 3];
-        printf("\033[1A\r%3d/%d (%3d, %3d) -> (%3d, %3d)\n", i + 1, len, x1, y2, x2, y2);
-        fflush(stdout);
 
         int x = x1;
         int y = y1;
@@ -207,8 +227,10 @@ int main(int argc, char *argv[]) {
     memset(sonar_line_map, 0, height * width * sizeof(*sonar_line_map));
     // animate sonar map
     // only write frames after a full loop
+    //printf("\n\n\n\n\n");
     double dir = -M_PI;
     for (int i = 0; i < N_ITERATIONS * 2; i++) {
+        //printf("\033[1A\r%3d/%d\n", i + 1, N_ITERATIONS * 2);
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
                 int index = row * width + col;

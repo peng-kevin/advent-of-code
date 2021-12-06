@@ -14,7 +14,7 @@
  */
 
 // switch between mp4 and webp
-enum Encoder {MP4, WEBP, WEBP_SHRINK};
+enum Encoder {MP4, MP4_RGB, WEBP, WEBP_SCALE, WEBP_LOSSY, GIF, GIF_SCALE};
 
 /**
  * Launches FFmpeg by forking the current process and creates a pipe with it.

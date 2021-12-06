@@ -36,11 +36,23 @@ int open_pipe(int fps, char* filename, enum Encoder encoder, int* outfd, pid_t* 
             case MP4:
                 execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "libx264", "-preset", "veryslow", "-crf", "0", "-pix_fmt", "yuv444p", filename, (char *) NULL);
                 break;
+            case MP4_RGB:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "libx264rgb", "-preset", "veryslow", "-crf", "0", "-pix_fmt", "yuv444p", filename, (char *) NULL);
+                break;
             case WEBP:
                 execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "100", "-loop", "0", filename, (char *) NULL);
                 break;
-            case WEBP_SHRINK:
+            case WEBP_LOSSY:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vcodec", "libwebp", "-lossless", "0", "-compression_level", "6", "-q:v", "85", "-loop", "0", filename, (char *) NULL);
+                break;
+            case WEBP_SCALE:
                 execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-vf", "scale=300:-1", "-sws_flags", "sinc", "-vcodec", "libwebp", "-lossless", "1", "-compression_level", "6", "-q:v", "100", "-loop", "0", filename, (char *) NULL);
+                break;
+            case GIF:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "gif", "-vf", "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", filename, (char *) NULL);
+                break;
+            case GIF_SCALE:
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "gif", "-vf", "scale=490:-1:flags=sinc,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", filename, (char *) NULL);
                 break;
         }
         return -1;
