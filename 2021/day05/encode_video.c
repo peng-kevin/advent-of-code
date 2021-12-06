@@ -52,7 +52,7 @@ int open_pipe(int fps, char* filename, enum Encoder encoder, int* outfd, pid_t* 
                 execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "gif", "-vf", "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", filename, (char *) NULL);
                 break;
             case GIF_SCALE:
-                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "gif", "-vf", "scale=490:-1:flags=sinc,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", filename, (char *) NULL);
+                execlp("ffmpeg", "ffmpeg", "-hide_banner", "-loglevel", FFMPEG_LOG_LEVEL, "-f", "image2pipe", "-framerate", fpsbuf, "-i", "-", "-c:v", "gif", "-vf", "fps=30,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse", "-loop", "0", filename, (char *) NULL);
                 break;
         }
         return -1;
