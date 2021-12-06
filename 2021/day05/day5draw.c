@@ -12,7 +12,7 @@
 //defines the value at which the output color is saturated
 #define MAXVAL 3
 // how many iterations betweens each frame
-#define ITERS_PER_FRAME 200
+#define ITERS_PER_FRAME 150
 #define BEFORE_FADE_FREEZE 30
 #define FADE_FRAMES 120
 #define FINAL_FREEZE 240
@@ -160,13 +160,13 @@ int main(int argc, char *argv[]) {
     // keep track of which frame we're on
     int frame = 0;
     // iterate
-    printf("\n\n\n");
+    printf("\n\n\n\n\n");
     for (int i = 0; i < len; i++) {
         int x1 = lines[4 * i];
         int y1 = lines[4 * i + 1];
         int x2 = lines[4 * i + 2];
         int y2 = lines[4 * i + 3];
-        printf("\033[1A\r%3d/%d (%3d, %3d) -> (%3d, %3d)                     \n", i, len, x1, y2, x2, y2);
+        printf("\033[1A\r%3d/%d (%3d, %3d) -> (%3d, %3d)\n", i, len, x1, y2, x2, y2);
         fflush(stdout);
 
         int x = x1;
