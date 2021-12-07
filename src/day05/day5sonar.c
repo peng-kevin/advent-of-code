@@ -79,14 +79,16 @@ void write_image (struct Color *image, int width, int height, int fd) {
     }
 }
 
-void prepare_and_write_image (double *glow_map, double *line_map, int width, int height, struct ColorMap colormap, int nframes, int fd) {
+void prepare_and_write_image (double *map, double *sweep_map, int width, int height, struct ColorMap colormap, int nframes, int fd) {
+    double *glow_map = add_glow(map, width, height, 5, 1.5);
     double *total_map = malloc_or_die(height * width * sizeof(*total_map));
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
             int index = row * width + col;
-            total_map[index] = glow_map[index] + line_map[index];
+            total_map[index] = glow_map[index] + sweep_map[index];
         }
     }
+    free(glow_map);
     struct Color *prepared_image = color_image(total_map, width, height, colormap, MAXVAL);
     free(total_map);
     for (int i = 0; i < nframes; i++) {
@@ -210,21 +212,18 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    // create glow
-    double *glowing_map = add_glow(map, width, height, 6, 1.5);
-    free(map);
     // cut off all points greater than MAXVAl
     for (int row = 0; row < height; row++) {
         for (int col = 0; col < width; col++) {
-            if (glowing_map[row * width + col] > MAXVAL) {
-                glowing_map[row * width + col] = MAXVAL;
+            if (map[row * width + col] > MAXVAL) {
+                map[row * width + col] = MAXVAL;
             }
         }
     }
-    double *sonar_glow_map = malloc_or_die(height * width * sizeof(*sonar_glow_map));
-    double *sonar_line_map = malloc_or_die(height * width * sizeof(*sonar_line_map));
-    memset(sonar_glow_map, 0, height * width * sizeof(*sonar_glow_map));
-    memset(sonar_line_map, 0, height * width * sizeof(*sonar_line_map));
+    double *sonar_map = malloc_or_die(height * width * sizeof(*sonar_map));
+    double *sonar_sweep_map = malloc_or_die(height * width * sizeof(*sonar_sweep_map));
+    memset(sonar_map, 0, height * width * sizeof(*sonar_map));
+    memset(sonar_sweep_map, 0, height * width * sizeof(*sonar_sweep_map));
     // animate sonar map
     // only write frames after a full loop
     //printf("\n\n\n\n\n");
@@ -239,14 +238,14 @@ int main(int argc, char *argv[]) {
                 // check which side we are on
                 double side = cos(dir) * (col - width/2.0) + sin(dir) * (row - height/2.0);
                 if (distance < 1.5 && side > 0) {
-                    sonar_line_map[index] = 1;
-                    sonar_glow_map[index] = glowing_map[index];
+                    sonar_sweep_map[index] = 1;
+                    sonar_map[index] = map[index];
                 } else {
-                    if (sonar_line_map[index] > 0) {
-                        sonar_line_map[index] -= (10.0 / N_ITERATIONS);
+                    if (sonar_sweep_map[index] > 0) {
+                        sonar_sweep_map[index] -= (10.0 / N_ITERATIONS);
                     }
-                    if (sonar_glow_map[index] > 0) {
-                        sonar_glow_map[index] -= ((1.0 * (double)MAXVAL) / N_ITERATIONS);
+                    if (sonar_map[index] > 0) {
+                        sonar_map[index] -= ((1.0 * (double)MAXVAL) / N_ITERATIONS);
                     }
 
                 }
@@ -254,12 +253,13 @@ int main(int argc, char *argv[]) {
         }
         dir += (2.0 * M_PI) / N_ITERATIONS;
         if (i >= N_ITERATIONS && i % ITERS_PER_FRAME == 0) {
-            prepare_and_write_image(sonar_glow_map, sonar_line_map, width, height, colormap, 1, outfd);
+            prepare_and_write_image(sonar_map, sonar_sweep_map, width, height, colormap, 1, outfd);
         }
     }
     close_pipe(outfd, pid);
-    free(sonar_glow_map);
-    free(sonar_line_map);
+    free(map);
+    free(sonar_map);
+    free(sonar_sweep_map);
     free(lines);
     destroy_colormap(colormap);
 }
