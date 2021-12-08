@@ -144,7 +144,5 @@ for l in lines:
         map[tochar(i)] = set('abcdefg')
     examples = l[0].split()
     map = findMap(examples, map.copy())
-    #print("finish")
-    #printMap(map)
     total += decode(l[1].split(), map)
 print(total)
