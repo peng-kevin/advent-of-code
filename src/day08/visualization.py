@@ -25,9 +25,9 @@ def colorNum(n):
 def printMap(map):
     for wire, match in map.items():
         if len(match) == 0:
-            print(f"\u001b[0K{wire} -> {colors.RED}{{}}{colors.RESET}")
+            print(f"\u001b[0K{colors.RED}{wire} -> {{}}{colors.RESET}")
         elif len(match) == 1:
-            print(f"\u001b[0K{wire} -> {colors.GREEN}{match}{colors.RESET}")
+            print(f"\u001b[0K{colors.GREEN}{wire} -> {match}{colors.RESET}")
         else:
             print(f"\u001b[0K{wire} -> {match}")
 
@@ -36,9 +36,17 @@ def printProgress(currentGuesses, map, needToClear):
         # goes up 8 lines
         print("\033[F\033[F\033[F\033[F\033[F\033[F\033[F\033[F\033[F")
     l = len(currentGuesses)
+    if completeMap(map) and l == len(currentExamples):
+        # we know that all guesses are currect
+        allGreen = True
+    else:
+        allGreen = False
     output = "\u001b[0K["
     for g in currentGuesses:
-        output = output + colorNum(g) + ", "
+        if allGreen:
+            output = output + colors.GREEN + str(g) + colors.RESET + ", "
+        else:
+            output = output + colorNum(g) + ", "
     for e in currentExamples[l:]:
         output = output + e + ", "
     output = output[:-2] + "]"
