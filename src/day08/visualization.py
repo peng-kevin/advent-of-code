@@ -1,7 +1,7 @@
 import time
+import sys
 
-inputf = "sample.txt"
-
+delay = 0.05
 class colors:
     RED = "\033[0;31m"
     YELLOW = "\033[0;33m"
@@ -10,17 +10,21 @@ class colors:
 
 # the current set of examples
 currentExamples = []
-# the current guesses for what the examples correspond to
-currentGuesses = []
 
 # the minm
 
-def colorNum(n):
+def colorNum(n, width):
     if n in [0, 6, 2, 3]:
-        return colors.YELLOW + str(n) + colors.RESET
+        return colors.YELLOW + '{num:{width}}'.format(num=n, width=width) + colors.RESET
     else:
-        return colors.GREEN + str(n) + colors.RESET
+        return colors.GREEN + '{num:{width}}'.format(num=n, width=width) + colors.RESET
 
+def printExamples(examples):
+    output = "["
+    for e in examples:
+        output += e + ", "
+    output = output[:-2] + "]"
+    print(output)
 
 def printMap(map):
     for wire, match in map.items():
@@ -42,23 +46,82 @@ def printProgress(currentGuesses, map, needToClear):
     else:
         allGreen = False
     output = "\u001b[0K["
-    for g in currentGuesses:
+    for e, g in zip(currentExamples, currentGuesses):
         if allGreen:
-            output = output + colors.GREEN + str(g) + colors.RESET + ", "
+            output = output + colors.GREEN + '{num:{width}}'.format(num=g, width=len(e)) + colors.RESET + ", "
         else:
-            output = output + colorNum(g) + ", "
+            output = output + colorNum(g, len(e)) + ", "
     for e in currentExamples[l:]:
         output = output + e + ", "
     output = output[:-2] + "]"
     print(output)
     printMap(map)
-    time.sleep(1)
+    time.sleep(delay)
 
-def tonum(c):
-    return ord(c) - ord('a')
-
-def tochar(n):
-    return chr(n + ord('a'))
+def printDisplay(map, codes):
+    invertedMap = {}
+    decodedWires = [{min(map[w]) for w in wires} for wires in codes]
+    for k, v in map.items():
+        invertedMap[min(v)] = k
+    dotRow = " .... "
+    row1 = " " + invertedMap['a'] * 4 + " "
+    row23 = invertedMap['b'] + "    " + invertedMap['c']
+    row4 = " " + invertedMap['d'] * 4 + " "
+    row56 = invertedMap['e'] + "    " + invertedMap['f']
+    row7 = " " + invertedMap['g'] * 4 + " "
+    print(row1, end="  ")
+    for wires in decodedWires:
+        if 'a' in wires:
+            print(colors.GREEN + row1 + colors.RESET, end="")
+        else:
+            print(dotRow, end="")
+        print("  ", end="")
+    print("")
+    for i in range(2):
+        print(row23, end="  ")
+        for wires in decodedWires:
+            if 'b' in wires:
+                print(colors.GREEN + invertedMap['b'] + colors.RESET, end="")
+            else:
+                print(".", end="")
+            print("    ", end="")
+            if 'c' in wires:
+                print(colors.GREEN + invertedMap['c'] + colors.RESET, end="")
+            else:
+                print(".", end="")
+            print("  ", end="")
+        print("")
+    print(row4, end="  ")
+    for wires in decodedWires:
+        if 'd' in wires:
+            print(colors.GREEN + row4 + colors.RESET, end="")
+        else:
+            print(dotRow, end="")
+        print("  ", end="")
+    print("")
+    for i in range(2):
+        print(row56, end="  ")
+        for wires in decodedWires:
+            if 'e' in wires:
+                print(colors.GREEN + invertedMap['e'] + colors.RESET, end="")
+            else:
+                print(".", end="")
+            print("    ", end="")
+            if 'f' in wires:
+                print(colors.GREEN + invertedMap['f'] + colors.RESET, end="")
+            else:
+                print(".", end="")
+            print("  ", end="")
+        print("")
+    print(row7, end="  ")
+    for wires in decodedWires:
+        if 'g' in wires:
+            print(colors.GREEN + row7 + colors.RESET, end="")
+        else:
+            print(dotRow, end="")
+        print("  ", end="")
+    print("")
+    time.sleep(delay)
 
 def completeMap(map):
     return len(map) > 0 and all(len(match) == 1 for _, match in map.items())
@@ -67,7 +130,7 @@ def validMap(map):
     return len(map) > 0 and all(len(match) >= 1 for _, match in map.items())
 
 
-
+# given a set of standard wires, return the corresponding number
 def sevenSegToNum(wires):
     if set(wires) == set('abcefg'):
         return 0
@@ -94,11 +157,12 @@ def sevenSegToNum(wires):
 def applyMap(wire, map):
     return [min(map[w]) for w in wire]
 
-def decode(wires, map):
+# given a set of set of wires, decode each and get the combined number
+def decode(code, map):
     sum = 0
-    for w in wires:
+    for wires in code:
         sum *= 10
-        sum += sevenSegToNum(applyMap(w, map))
+        sum += sevenSegToNum(applyMap(wires, map))
     return sum
 
 # set(lhs) -> set(rhs)
@@ -198,17 +262,29 @@ def findMap(examples, map, currentGuesses):
                 return map3
         return {}
 
-with open(inputf) as f:
+if len(sys.argv) != 3:
+    print(f"usage: python3 {sys.argv[0]} input delay")
+    sys.exit(1)
+with open(sys.argv[1]) as f:
     lines = f.readlines()
 lines = [x.split("|") for x in lines]
+try:
+    delay = int(sys.argv[2])
+except:
+    print("delay must be a number")
+
 total = 0
 for l in lines:
     map = {}
     for i in range(7):
-        map[tochar(i)] = set('abcdefg')
+        map[chr(i + ord('a'))] = set('abcdefg')
     examples = l[0].split()
     currentExamples = examples.copy()
+    printExamples(examples)
     printProgress([], map, False)
     map = findMap(examples, map.copy(), [])
+    printExamples(l[1].split())
+    printDisplay(map, l[1].split())
+    print("")
     total += decode(l[1].split(), map)
 print(total)
