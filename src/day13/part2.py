@@ -23,7 +23,7 @@ def printgrid(grid):
     for row in board:
         for c in row:
             if c:
-                print("*", end="")
+                print(chr(0x2588), end="")
             else:
                 print(" ", end="")
         print("")
