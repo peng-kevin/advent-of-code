@@ -5,14 +5,14 @@
 # generate a nicely formatted table with this script.
 
 # File containing star data
-star_file = 'star_table_data.md'
+STAR_FILE = 'star_table_data.md'
 # README file
-readme_file = 'README.md'
+README_FILE = 'README.md'
 # maximum length of a column
-min_length = len(':star::star:')
+MIN_LENGTH = len(':star::star:')
 # The lines marking the start and end of the table in the README
-table_start_marker = '[comment]: # (STAR TABLE START)'
-table_end_marker = '[comment]: # (STAR TABLE END)'
+TABLE_START_MARKER = '[comment]: # (STAR TABLE START)'
+TABLE_END_MARKER = '[comment]: # (STAR TABLE END)'
 
 # Pads out the columns to line up the formatting and replace "X" with ":star:"
 def process_line(line, pad_char, min_length):
@@ -38,9 +38,9 @@ def process_table(star_file):
         for i, line in enumerate(file):
             if i == 1:
                 # The divider line should be padded with hypens
-                result += process_line(line, '-', min_length)
+                result += process_line(line, '-', MIN_LENGTH)
             else:
-                result += process_line(line, ' ', min_length)
+                result += process_line(line, ' ', MIN_LENGTH)
     return result
 
 # Inserts the processed_table into the readme between the delimeter
@@ -66,8 +66,7 @@ def inject_table(readme_file, start_marker, end_marker, table):
         file.seek(0)
         file.truncate(0)
         new_text = before + start_marker + '\n\n' + table + '\n\n' + end_marker + after
-        print(new_text, end='')
         file.write(new_text)
 
-processed_table = process_table(star_file)
-inject_table(readme_file, table_start_marker, table_end_marker, processed_table)
+processed_table = process_table(STAR_FILE)
+inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
