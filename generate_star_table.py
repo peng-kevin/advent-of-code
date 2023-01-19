@@ -68,5 +68,6 @@ def inject_table(readme_file, start_marker, end_marker, table):
         new_text = before + start_marker + '\n\n' + table + '\n\n' + end_marker + after
         file.write(new_text)
 
-processed_table = process_table(STAR_FILE)
-inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
+if __name__ == '__main__':
+    processed_table = process_table(STAR_FILE)
+    inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
