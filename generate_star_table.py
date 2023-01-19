@@ -49,17 +49,19 @@ def inject_table(readme_file, start_marker, end_marker, table):
         text = file.read()
 
         # Get the text before the start_marker
+        if text.count(start_marker) > 1:
+            raise RuntimeError(f'Error: table start marker "{start_marker}" occurs multiple times in "{readme_file}"')
         partition = text.partition(start_marker)
         if partition[1] == '':
-            print(f'Error: table start marker "{start_marker}" not found in {readme_file}')
-            return
+            raise RuntimeError(f'Error: table start marker "{start_marker}" not found in "{readme_file}"')
         before = partition[0]
 
         # Get the text after the end_marker
+        if text.count(end_marker) > 1:
+            raise RuntimeError(f'Error: table end marker "{end_marker}" occurs multiple times in "{readme_file}"')
         partition = text.partition(end_marker)
         if partition[1] == '':
-            print(f'Error: table end marker "{end_marker}" not found in {readme_file}')
-            return
+            raise RuntimeError(f'Error: table end marker "{end_marker}" not found in "{readme_file}"')
         after = partition[2]
 
         # Insert the table between the markers and write it
@@ -69,5 +71,17 @@ def inject_table(readme_file, start_marker, end_marker, table):
         file.write(new_text)
 
 if __name__ == '__main__':
-    processed_table = process_table(STAR_FILE)
-    inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
+    try:
+        processed_table = process_table(STAR_FILE)
+    except FileNotFoundError:
+        print(f'Error: Could not find star table file "{STAR_FILE}"')
+        exit(1)
+
+    try:
+        inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
+    except FileNotFoundError:
+        print(f'Error: Could not find README file "{README_FILE}"')
+        exit(1)
+    except RuntimeError as e:
+        print(e)
+        exit(1)
