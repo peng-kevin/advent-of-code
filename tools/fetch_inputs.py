@@ -2,6 +2,7 @@
 
 import urllib.request
 import os
+import sys
 
 
 # Which days to get inputs for 
@@ -53,10 +54,19 @@ def fetch_input_year(year, session):
 
 
 # Gets the session token from session.txt
-def get_session_token():
-    with open(SESSION_FILE) as file:
+def get_session_token(session_file):
+    with open(session_file) as file:
         return file.read().strip()
 
 if __name__ == '__main__':
+    try:
+        session_token = get_session_token(SESSION_FILE)
+    except FileNotFoundError:
+        print(f'Error: session file "{SESSION_FILE}" not found. This file should contain your session token for fetching input', file=sys.stderr)
+        exit(1)
+    if session_token == '':
+        print(f'Error: session file "{SESSION_FILE}" is empty. This file should contain your session token for fetching input', file=sys.stderr)
+        exit(1)
+
     for year in range(START_YEAR, END_YEAR + 1):
-        fetch_input_year(year, get_session_token())
+        fetch_input_year(year, session_token)
