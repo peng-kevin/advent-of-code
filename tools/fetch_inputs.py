@@ -16,6 +16,24 @@ INPUT_FILENAME = 'input.txt'
 SESSION_FILE = 'session.txt'
 
 
+class colors:
+    RESET = '\033[0;0m'
+    FETCHED = '\033[0;32m'
+    CACHED = '\033[0;32m'
+    SKIPPED = '\033[0;90m'
+
+
+class DirNotFoundError(RuntimeError):
+    pass
+
+
+class FileExistsError(RuntimeError):
+    pass
+
+# Prints with color where "color" is an ansi code
+def cprint(string, color, file=sys.stdout, end='\n', flush=False):
+    print(f'{color}{string}{colors.RESET}', file=file, end=end, flush=flush)
+
 # Downloads and returns the input for a certain year and day
 def fetch_input_text(year, day, session):
     request = urllib.request.Request(f'https://adventofcode.com/{year}/day/{day}/input')
@@ -37,10 +55,10 @@ def fetch_input_day(year, day, session):
     input_file_path = get_input_file_path(year, day)
     # Check if the folder for the day exists
     if (not os.path.isdir(os.path.dirname(input_file_path))):
-        return
+        raise DirNotFoundError(f'No such directory: {os.path.dirname(input_file_path)}')
     # Check if the file exists
     if (os.path.exists(input_file_path)):
-        return
+        raise FileExistsError(f'File exists: {input_file_path}')
     # Download and write the file
     input = fetch_input_text(year, day, session)
     with open(input_file_path, 'w', encoding='utf-8') as file:
@@ -48,15 +66,41 @@ def fetch_input_day(year, day, session):
 
 
 # Downloads and writes the input files for a year
+# Returns true if at least one directory for a day was found, false otherwise
 def fetch_input_year(year, session):
+    print(f'{year}: ', end='', flush=True)
+    no_day_exists = True
     for day in range(1, NUM_DAYS + 1):
-        fetch_input_day(year, day, session)
+        try:
+            fetch_input_day(year, day, session)
+        except DirNotFoundError:
+            cprint(f'.', colors.SKIPPED, end ='', flush=True)
+            day_exists = False
+        except FileExistsError:
+            cprint('-', colors.CACHED, end='', flush=True)
+            day_exists = True
+        else:
+            cprint('X', colors.FETCHED, end='', flush=True)
+            day_exists = True
+        if day_exists:
+            no_day_exists = False
+    print("")
+    return not no_day_exists
 
 
 # Gets the session token from session.txt
 def get_session_token(session_file):
     with open(session_file) as file:
         return file.read().strip()
+
+
+def print_symbol_guide():
+    cprint('.', colors.SKIPPED, end='')
+    print(': directory for day does not exist (skipped)')
+    cprint('-', colors.CACHED, end='')
+    print(': input for day already exists (cached)')
+    cprint('X', colors.FETCHED, end='')
+    print(': input for day downloaded')
 
 if __name__ == '__main__':
     try:
@@ -68,5 +112,12 @@ if __name__ == '__main__':
         print(f'Error: session file "{SESSION_FILE}" is empty. This file should contain your session token for fetching input', file=sys.stderr)
         exit(1)
 
+    print_symbol_guide()
+    no_day_exists = True
     for year in range(START_YEAR, END_YEAR + 1):
-        fetch_input_year(year, session_token)
+        if fetch_input_year(year, session_token):
+            no_day_exists = False
+
+    if no_day_exists:
+        print('No directory for a day was found. Are you running this script from the root of the repository?')
+    
