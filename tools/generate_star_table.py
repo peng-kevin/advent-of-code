@@ -4,6 +4,8 @@
 # so my solution is to create a data table which represents stars with "X" and
 # generate a nicely formatted table with this script.
 
+import sys
+
 # File containing star data
 STAR_FILE = 'star_table_data.md'
 # README file
@@ -74,14 +76,14 @@ if __name__ == '__main__':
     try:
         processed_table = process_table(STAR_FILE)
     except FileNotFoundError:
-        print(f'Error: Could not find star table file "{STAR_FILE}"')
+        print(f'Error: Could not find star table file "{STAR_FILE}"', file=sys.stderr)
         exit(1)
 
     try:
         inject_table(README_FILE, TABLE_START_MARKER, TABLE_END_MARKER, processed_table)
     except FileNotFoundError:
-        print(f'Error: Could not find README file "{README_FILE}"')
+        print(f'Error: Could not find README file "{README_FILE}"', file=sys.stderr)
         exit(1)
     except RuntimeError as e:
-        print(e)
+        print(e, file=sys.stderr)
         exit(1)
