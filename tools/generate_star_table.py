@@ -6,6 +6,7 @@
 
 import sys
 
+
 # File containing star data
 STAR_FILE = 'star_table_data.md'
 # README file
@@ -15,6 +16,7 @@ MIN_LENGTH = len(':star::star:')
 # The lines marking the start and end of the table in the README
 TABLE_START_MARKER = '[comment]: # (STAR TABLE START)'
 TABLE_END_MARKER = '[comment]: # (STAR TABLE END)'
+
 
 # Pads out the columns to line up the formatting and replace "X" with ":star:"
 def process_line(line, pad_char, min_length):
@@ -33,6 +35,7 @@ def process_line(line, pad_char, min_length):
     result += '\n'
     return result
 
+
 # Processes each line to generate the processed table
 def process_table(star_file):
     result = ''
@@ -44,6 +47,7 @@ def process_table(star_file):
             else:
                 result += process_line(line, ' ', MIN_LENGTH)
     return result
+
 
 # Inserts the processed_table into the readme between the delimeter
 def inject_table(readme_file, start_marker, end_marker, table):
@@ -71,6 +75,7 @@ def inject_table(readme_file, start_marker, end_marker, table):
         file.truncate(0)
         new_text = before + start_marker + '\n\n' + table + '\n\n' + end_marker + after
         file.write(new_text)
+
 
 if __name__ == '__main__':
     try:
