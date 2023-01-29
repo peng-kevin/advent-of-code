@@ -30,9 +30,15 @@ class DirNotFoundError(RuntimeError):
 class FileExistsError(RuntimeError):
     pass
 
+# Returns the expected path for the input file of a certain year and day
+def get_input_file_path(year, day):
+    return os.path.join('src', str(year), f'day{str(day).zfill(2)}', INPUT_FILENAME)
+
+
 # Prints with color where "color" is an ansi code
 def cprint(string, color, file=sys.stdout, end='\n', flush=False):
     print(f'{color}{string}{colors.RESET}', file=file, end=end, flush=flush)
+
 
 # Downloads and returns the input for a certain year and day
 def fetch_input_text(year, day, session):
@@ -41,11 +47,6 @@ def fetch_input_text(year, day, session):
     request.add_header('User-Agent', USER_AGENT)
     with urllib.request.urlopen(request) as response:
         return response.read().decode('utf-8')
-
-
-# Returns the expected path for the input file of a certain year and day
-def get_input_file_path(year, day):
-    return os.path.join(str(year), 'src', f'day{str(day).zfill(2)}', INPUT_FILENAME)
 
 
 # Downloads and writes the input file
@@ -101,6 +102,7 @@ def print_symbol_guide():
     print(': input for day already exists (cached)')
     cprint('X', colors.FETCHED, end='')
     print(': input for day downloaded')
+
 
 if __name__ == '__main__':
     try:
