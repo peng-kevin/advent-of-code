@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 import re
-
-inputf = "input.txt"
+import sys
 
 def tonum(c):
     return ord(c) - ord('a')
@@ -134,15 +134,21 @@ def findMap(examples, map):
         else:
             return {}
 
-with open(inputf) as f:
-    lines = f.readlines()
-lines = [x.split("|") for x in lines]
-total = 0
-for l in lines:
-    map = {}
-    for i in range(7):
-        map[tochar(i)] = set('abcdefg')
-    examples = l[0].split()
-    map = findMap(examples, map.copy())
-    total += decode(l[1].split(), map)
-print(total)
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print(f'Usage: {sys.argv[0]} input_file', file=sys.stderr)
+        exit(1)
+
+    filename = sys.argv[1]
+    with open(filename) as f:
+        lines = f.readlines()
+    lines = [x.split("|") for x in lines]
+    total = 0
+    for l in lines:
+        map = {}
+        for i in range(7):
+            map[tochar(i)] = set('abcdefg')
+        examples = l[0].split()
+        map = findMap(examples, map.copy())
+        total += decode(l[1].split(), map)
+    print(total)

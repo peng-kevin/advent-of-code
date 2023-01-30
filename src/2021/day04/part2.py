@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 import re
-
-inputf = "input.txt"
+import sys
 
 class Board:
   def __init__(self, grid):
@@ -28,24 +28,30 @@ class Board:
   def disable(self):
     self.disabled = True
 
-boards = []
-with open(inputf) as f:
-  draws = [int(x) for x in f.readline().split(",")]
-  boards_str = f.read().split("\n\n")
-  for b in boards_str:
-    rows = b.split("\n")
-    grid = []
-    for r in rows:
-      grid.append([int(x) for x in r.split()])
-    boards.append(Board(grid))
+if __name__ == '__main__':
+  if len(sys.argv) != 2:
+    print(f'Usage: {sys.argv[0]} input_file', file=sys.stderr)
+    exit(1)
 
-last_winner = -1
-for d in draws:
-  for b in boards:
-    b.mark(d)
-    if(b.isWin()):
-      last_winner = b.score() * d
-      b.disable()
+  filename = sys.argv[1]
+  boards = []
+  with open(filename) as f:
+    draws = [int(x) for x in f.readline().split(",")]
+    boards_str = f.read().split("\n\n")
+    for b in boards_str:
+      rows = b.split("\n")
+      grid = []
+      for r in rows:
+        grid.append([int(x) for x in r.split()])
+      boards.append(Board(grid))
 
-print("last winner:")
-print(last_winner)
+  last_winner = -1
+  for d in draws:
+    for b in boards:
+      b.mark(d)
+      if(b.isWin()):
+        last_winner = b.score() * d
+        b.disable()
+
+  print("last winner:")
+  print(last_winner)
