@@ -17,3 +17,9 @@ Personal solutions and visualizations for Advent of Code.
 
 
 [comment]: # (STAR TABLE END)
+
+## Tools
+
+The tools directory contains a variety of scripts for automating certain tasks.
+
+**Important:** All tooks must be run in the root directory of the repository to function correctly. Otherwise, they will not be able to traverse the directory structure and locate files.
