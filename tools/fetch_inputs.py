@@ -104,7 +104,7 @@ def print_symbol_guide():
     print(': input for day downloaded')
 
 
-if __name__ == '__main__':
+def main():
     try:
         session_token = get_session_token(SESSION_FILE)
     except FileNotFoundError:
@@ -122,4 +122,8 @@ if __name__ == '__main__':
 
     if no_day_exists:
         print('No directory for a day was found. Are you running this script from the root of the repository?')
+
+
+if __name__ == '__main__':
+    main()
     
