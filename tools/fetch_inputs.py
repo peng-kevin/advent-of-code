@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
 import urllib.request
 import os
 import sys
@@ -108,7 +109,8 @@ def main():
     try:
         session_token = get_session_token(SESSION_FILE)
     except FileNotFoundError:
-        print(f'Error: session file "{SESSION_FILE}" not found. This file should contain your session token for fetching input', file=sys.stderr)
+        print(f'Error: session file "{SESSION_FILE}" not found. This file should contain your session token for fetching input. The file has been created in the current directory.', file=sys.stderr)
+        Path(SESSION_FILE).touch()
         exit(1)
     if session_token == '':
         print(f'Error: session file "{SESSION_FILE}" is empty. This file should contain your session token for fetching input', file=sys.stderr)
