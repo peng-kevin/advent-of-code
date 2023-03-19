@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
+from typing import TextIO
 import urllib.request
 import os
 import sys
@@ -22,12 +22,12 @@ class FileExistsError(RuntimeError):
 
 
 # Prints with color where "color" is an ansi code
-def cprint(string, color, file=sys.stdout, end='\n', flush=False):
+def cprint(string: str, color: str, file: TextIO = sys.stdout, end: str = '\n', flush: bool = False) -> None:
     print(f'{color}{string}{colors.RESET}', file=file, end=end, flush=flush)
 
 
 # Downloads and returns the input for a certain year and day
-def fetch_input_text(year, day, session):
+def fetch_input_text(year: int, day: int, session: str) -> str:
     request = urllib.request.Request(f'https://adventofcode.com/{year}/day/{day}/input')
     request.add_header('Cookie', f'session={session}')
     request.add_header('User-Agent', common.get_user_agent())
@@ -38,7 +38,7 @@ def fetch_input_text(year, day, session):
 # Downloads and writes the input file
 # Only done if the directory for this year and day exists and the input file
 # does not exist to avoid sending the server unnecessary requests
-def fetch_input_day(year, day, session):
+def fetch_input_day(year: int, day: int, session: str) -> None:
     input_file_path = common.get_input_file_path(year, day)
     # Check if the folder for the day exists
     if (not os.path.isdir(os.path.dirname(input_file_path))):
@@ -54,7 +54,7 @@ def fetch_input_day(year, day, session):
 
 # Downloads and writes the input files for a year
 # Returns true if at least one directory for a day was found, false otherwise
-def fetch_input_year(year, session):
+def fetch_input_year(year: int, session: str) -> bool:
     print(f'{year}: ', end='', flush=True)
     no_day_exists = True
     for day in range(1, common.get_num_days() + 1):
@@ -75,7 +75,7 @@ def fetch_input_year(year, session):
     return not no_day_exists
 
 
-def print_symbol_guide():
+def print_symbol_guide() -> None:
     cprint('.', colors.SKIPPED, end='')
     print(': directory for day does not exist (skipped)')
     cprint('-', colors.CACHED, end='')
@@ -84,7 +84,7 @@ def print_symbol_guide():
     print(': input for day downloaded')
 
 
-def main():
+def main() -> None:
     try:
         session_token = common.get_session_token()
     except FileNotFoundError as e:
