@@ -4,18 +4,7 @@ from pathlib import Path
 import urllib.request
 import os
 import sys
-
-
-# Which days to get inputs for 
-START_YEAR = 2015
-END_YEAR = 2022
-NUM_DAYS = 25
-
-USER_AGENT = 'https://github.com/peng-kevin/advent-of-code by kevinpeng02@gmail.com'
-INPUT_FILENAME = 'input.txt'
-
-SESSION_FILE = 'session.txt'
-
+import tool_common as common
 
 class colors:
     RESET = '\033[0;0m'
@@ -31,10 +20,6 @@ class DirNotFoundError(RuntimeError):
 class FileExistsError(RuntimeError):
     pass
 
-# Returns the expected path for the input file of a certain year and day
-def get_input_file_path(year, day):
-    return os.path.join('src', str(year), f'day{str(day).zfill(2)}', INPUT_FILENAME)
-
 
 # Prints with color where "color" is an ansi code
 def cprint(string, color, file=sys.stdout, end='\n', flush=False):
@@ -45,7 +30,7 @@ def cprint(string, color, file=sys.stdout, end='\n', flush=False):
 def fetch_input_text(year, day, session):
     request = urllib.request.Request(f'https://adventofcode.com/{year}/day/{day}/input')
     request.add_header('Cookie', f'session={session}')
-    request.add_header('User-Agent', USER_AGENT)
+    request.add_header('User-Agent', common.get_user_agent())
     with urllib.request.urlopen(request) as response:
         return response.read().decode('utf-8')
 
@@ -54,7 +39,7 @@ def fetch_input_text(year, day, session):
 # Only done if the directory for this year and day exists and the input file
 # does not exist to avoid sending the server unnecessary requests
 def fetch_input_day(year, day, session):
-    input_file_path = get_input_file_path(year, day)
+    input_file_path = common.get_input_file_path(year, day)
     # Check if the folder for the day exists
     if (not os.path.isdir(os.path.dirname(input_file_path))):
         raise DirNotFoundError(f'No such directory: {os.path.dirname(input_file_path)}')
@@ -72,7 +57,7 @@ def fetch_input_day(year, day, session):
 def fetch_input_year(year, session):
     print(f'{year}: ', end='', flush=True)
     no_day_exists = True
-    for day in range(1, NUM_DAYS + 1):
+    for day in range(1, common.get_num_days() + 1):
         try:
             fetch_input_day(year, day, session)
         except DirNotFoundError:
@@ -90,12 +75,6 @@ def fetch_input_year(year, session):
     return not no_day_exists
 
 
-# Gets the session token from session.txt
-def get_session_token(session_file):
-    with open(session_file) as file:
-        return file.read().strip()
-
-
 def print_symbol_guide():
     cprint('.', colors.SKIPPED, end='')
     print(': directory for day does not exist (skipped)')
@@ -107,18 +86,17 @@ def print_symbol_guide():
 
 def main():
     try:
-        session_token = get_session_token(SESSION_FILE)
-    except FileNotFoundError:
-        print(f'Error: session file "{SESSION_FILE}" not found. This file should contain your session token for fetching input. The file has been created in the current directory.', file=sys.stderr)
-        Path(SESSION_FILE).touch()
+        session_token = common.get_session_token()
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
         exit(1)
-    if session_token == '':
-        print(f'Error: session file "{SESSION_FILE}" is empty. This file should contain your session token for fetching input', file=sys.stderr)
+    except common.EmptySessionFileError as e:
+        print(f"Error: {e}", file=sys.stderr)
         exit(1)
 
     print_symbol_guide()
     no_day_exists = True
-    for year in range(START_YEAR, END_YEAR + 1):
+    for year in range(common.get_start_year(), common.get_end_year() + 1):
         if fetch_input_year(year, session_token):
             no_day_exists = False
 
