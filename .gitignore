@@ -1,4 +1,11 @@
+# Not day inputs
 input.txt
+# Leaking session key will be a security issue
 session.txt
+
+# Don't include compiled programs
 day5draw
 day5sonar
+
+__pycache__/
+
