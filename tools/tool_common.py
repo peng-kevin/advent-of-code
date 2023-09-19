@@ -16,14 +16,19 @@ class EmptySessionFileError(RuntimeError):
     pass
 
 
+def get_day_file_path(year, day) -> str:
+    """Returns the expected path of the directory for a certain year and day"""
+    return path.join('src', str(year), f'day{str(day).zfill(2)}')
+
+
 def get_answer_file_path(year, day) -> str:
     """Returns the expected path for the input file of a certain year and day"""
-    return path.join('src', str(year), f'day{str(day).zfill(2)}', ANSWER_FILENAME)
+    return path.join(get_day_file_path(year, day), ANSWER_FILENAME)
 
 
 def get_input_file_path(year, day) -> str:
     """Returns the expected path for the input file of a certain year and day"""
-    return path.join('src', str(year), f'day{str(day).zfill(2)}', INPUT_FILENAME)
+    return path.join(get_day_file_path(year, day), INPUT_FILENAME)
 
 
 def get_user_agent() -> str:

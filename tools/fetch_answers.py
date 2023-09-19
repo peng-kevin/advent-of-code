@@ -21,15 +21,17 @@ def fetch_answer_text(year: int, day: int, session: str) -> str:
     print(text)
 
 
-def main():
+def print_symbol_guide() -> None:
+    print("TODO: implement symbol guide")
+
+def main() -> None:
     try:
-        session_token = get_session_token(SESSION_FILE)
-    except FileNotFoundError:
-        print(f'Error: session file "{SESSION_FILE}" not found. This file should contain your session token for fetching input. The file has been created in the current directory.', file=sys.stderr)
-        Path(SESSION_FILE).touch()
+        session_token = common.get_session_token()
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
         exit(1)
-    if session_token == '':
-        print(f'Error: session file "{SESSION_FILE}" is empty. This file should contain your session token for fetching input', file=sys.stderr)
+    except common.EmptySessionFileError as e:
+        print(f"Error: {e}", file=sys.stderr)
         exit(1)
 
     print_symbol_guide()
